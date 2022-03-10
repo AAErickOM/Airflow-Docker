@@ -1,4 +1,8 @@
 version: '3.7'
+
+volumes:
+  dataradios:
+
 services:
     postgres:
         image: postgres:9.6
@@ -40,6 +44,7 @@ services:
         volumes:
             - ./airflow/dags:/usr/local/airflow/dags
             - ./scripts:/usr/local/airflow/scripts
+            - dataradios:/data
         ports:
             - "8080:8080"
         command: webserver
@@ -59,6 +64,7 @@ services:
         volumes:
             - ./airflow/dags:/usr/local/airflow/dags
             - ./scripts:/usr/local/airflow/scripts
+            - dataradios:/data
         environment:
             - LOAD_EX=n
             - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
@@ -78,6 +84,7 @@ services:
         volumes:
             - ./airflow/dags:/usr/local/airflow/dags
             - ./scripts:/usr/local/airflow/scripts
+            - dataradios:/data
         environment:
             - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
             - EXECUTOR=Celery
@@ -96,6 +103,7 @@ services:
         volumes:
             - ./airflow/dags:/usr/local/airflow/dags
             - ./scripts:/usr/local/airflow/scripts
+            - dataradios:/data
         environment:
             - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
             - EXECUTOR=Celery
@@ -103,6 +111,7 @@ services:
         command: worker
         env_file:
           - env.list
+
 
 
 
