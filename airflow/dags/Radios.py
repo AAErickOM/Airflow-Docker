@@ -5,31 +5,11 @@ import logging
 import requests
 import pandas as pd
 
-from datetime import datetime
-
-
 from datetime import datetime, timedelta
 from airflow import DAG
-from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import PythonOperator
-
-def scrap_radio(stream_url, label, factor=150, path="", delay=0):
-    if not os.path.isdir(path):
-        os.makedirs(path)
-
-    logging.info(f"[{label}] 20 seg audio start downloading ...")
-
-    try:
-        r = requests.get(stream_url, stream=True)
-        block = r.iter_content(1024 * factor)
-        now = datetime.today().strftime("%Y%m%d%H%M%S")
-        filename = f"/{label}_{now}.mp3"
-
-        with open(path + filename, "wb") as file:
-            file.write(block)
-
-    except:
-        pass
+from scripts.procesos import scrap_radio
+from scripts.leerymover import read_speech_basic
 
 #Radios a ser scrapeadas
 bdRadios = pd.read_csv("/usr/local/airflow/dags/Radios.csv")
@@ -67,26 +47,53 @@ with DAG(
         catchup=False,
         tags=["Radio"],
 ) as dag:
-    run_scripts = DummyOperator(
-        task_id="init",
-        dag=dag
-    )
 
-    lista_procesos = []
+
 
     for radio in bdRadios.index:
         radio_url = bdRadios["url"][radio]
         radio_name = bdRadios["radio"][radio]
         radio_name = "_".join(radio_name.split())
         radio_factor = int(bdRadios["factor_descarga"][radio])
+
+        #Creando rutas
+        ruta = f"data/{radio_name}"
+        ruta_read = f"data/{radio_name}_read"
+        ruta_transcript = f"data/{radio_name}_transcript"
+        ruta_fail = f"data/{radio_name}_fail"
+
+        if not os.path.isdir(ruta_read):
+            os.makedirs(ruta_read)
+
+        if not os.path.isdir(ruta_transcript):
+            os.makedirs(ruta_transcript)
+
+        if not os.path.isdir(ruta_fail):
+            os.makedirs(ruta_fail)
+
+        now = datetime.today().strftime("%Y%m%d%H%M%S")
+
+        #Creacion de DAGs
         stream = PythonOperator(
             task_id='Descarga_radio_{}'.format(radio_name),
             python_callable=scrap_radio,
             op_kwargs={"stream_url": radio_url,
+                       "now": now,
                        "label": radio_name,
                        "factor": radio_factor,
                        "path": f"data/{radio_name}",
                        "delay": 10},
                 dag=dag,)
 
+        leerymover = PythonOperator(
+            task_id='LeeryMover_{}'.format(radio_name),
+            python_callable=read_speech_basic,
+            op_kwargs={
+                "path": ruta,
+                "ruta_read":ruta_read,
+                "ruta_transcript":ruta_transcript,
+                "ruta_fail": ruta_fail,
+            },
+                dag=dag,)
 
+        stream >> leerymover
