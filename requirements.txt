@@ -28,3 +28,4 @@ pause~=0.3
 nltk~=3.6.5
 pysentimiento~=0.3.2
 openpyxl~=3.0.9
+typing-extensions~=4.1.1

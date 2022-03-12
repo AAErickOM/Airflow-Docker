@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 import os
-import time
-import logging
-import requests
 import pandas as pd
 
 from datetime import datetime, timedelta
@@ -10,7 +7,6 @@ from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from scripts.procesos import scrap_radio
 from scripts.leerymover import read_speech_basic
-
 #Radios a ser scrapeadas
 bdRadios = pd.read_csv("/usr/local/airflow/dags/Radios.csv")
 
@@ -27,7 +23,7 @@ with DAG(
             'email_on_failure': False,
             'email_on_retry': False,
             'retries': 1,
-            'retry_delay': timedelta(minutes=5),
+            'retry_delay': timedelta(seconds=1),
             # 'queue': 'bash_queue',
             # 'pool': 'backfill',
             # 'priority_weight': 10,
@@ -83,7 +79,8 @@ with DAG(
                        "factor": radio_factor,
                        "path": f"data/{radio_name}",
                        "delay": 10},
-                dag=dag,)
+            execution_timeout=timedelta(seconds = 30),
+            dag=dag,)
 
         leerymover = PythonOperator(
             task_id='LeeryMover_{}'.format(radio_name),
@@ -94,6 +91,9 @@ with DAG(
                 "ruta_transcript":ruta_transcript,
                 "ruta_fail": ruta_fail,
             },
-                dag=dag,)
+            execution_timeout=timedelta(seconds=30),
+            dag=dag,)
 
         stream >> leerymover
+
+        # Creando DAG para Airflow
