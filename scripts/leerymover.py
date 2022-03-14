@@ -23,15 +23,15 @@ def read_speech_basic(path, ruta_read, ruta_transcript, ruta_fail,  tmp_dir="dat
 
         try:
 
-            print("000000000000000000000000000000000000")
+            print("Lectura de archivos")
             print(f"{ruta_read}/{filename}.mp3")
             audio = AudioSegment.from_file(f"{ruta_read}/{filename}.mp3")
 
-            print("11111111111111111111111111111111111")
+            print("Exportar a wav")
             audio.export(filedir, format="wav")
 
             r = sr.Recognizer()
-            print("22222222222222222222222222222222222")
+            print("Transcripcion")
             with sr.AudioFile(filedir) as source:
 
                 audio = r.listen(source, timeout=30)

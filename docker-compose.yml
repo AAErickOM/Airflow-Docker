@@ -80,6 +80,7 @@ services:
             - ./airflow/dags:/usr/local/airflow/dags
             - ./scripts:/usr/local/airflow/scripts
             - ./data:/usr/local/airflow/data
+            - ../conflictividad_backend/files:/usr/local/airflow/data_backend
         environment:
             - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
             - EXECUTOR=Celery
@@ -98,6 +99,7 @@ services:
             - ./airflow/dags:/usr/local/airflow/dags
             - ./scripts:/usr/local/airflow/scripts
             - ./data:/usr/local/airflow/data
+            - ../conflictividad_backend/files:/usr/local/airflow/data_backend
         environment:
             - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
             - EXECUTOR=Celery
@@ -116,6 +118,7 @@ services:
             - ./airflow/dags:/usr/local/airflow/dags
             - ./scripts:/usr/local/airflow/scripts
             - ./data:/usr/local/airflow/data
+            - ../conflictividad_backend/files:/usr/local/airflow/data_backend
         environment:
             - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
             - EXECUTOR=Celery
@@ -123,44 +126,6 @@ services:
         command: worker
         env_file:
             - env.list
-    worker4:
-        image: worker4:latest
-        build:
-            context: .
-        restart: always
-        depends_on:
-            - scheduler
-        volumes:
-            - ./airflow/dags:/usr/local/airflow/dags
-            - ./scripts:/usr/local/airflow/scripts
-            - ./data:/usr/local/airflow/data
-        environment:
-            - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
-            - EXECUTOR=Celery
-            - PYTHONPATH=/usr/local/airflow
-        command: worker
-        env_file:
-            - env.list
-
-    worker5:
-        image: worker5:latest
-        build:
-            context: .
-        restart: always
-        depends_on:
-            - scheduler
-        volumes:
-            - ./airflow/dags:/usr/local/airflow/dags
-            - ./scripts:/usr/local/airflow/scripts
-            - ./data:/usr/local/airflow/data
-        environment:
-            - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
-            - EXECUTOR=Celery
-            - PYTHONPATH=/usr/local/airflow
-        command: worker
-        env_file:
-            - env.list
-
 volumes:
   dataradios:
 

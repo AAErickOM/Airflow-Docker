@@ -7,8 +7,8 @@ from shutil import move
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 from pysentimiento import create_analyzer
-
-
+import requests
+import pause
 
 
 
@@ -64,7 +64,7 @@ def preprocess(text, stem=True):
 
 def tag_file(radio, clear_tags=True):
     core_dir = "core"
-    backend_dir = "../conflictividad_backend"
+    backend_dir = "data_backend"
 
     analyzer = create_analyzer(task="sentiment", lang="es")
 
@@ -115,11 +115,10 @@ def tag_file(radio, clear_tags=True):
         # 'pel':'Conflicto',
     }
 
-    #| df_keywords.set_index("word")["sector"].to_dict()
+    keywords = {**keywords, **(df_keywords.set_index("word")["sector"].to_dict())}
 
-
-
-
+    data_blacklist = eval(requests.get("http://190.223.48.219:8000/conflictividad/blacklist").text)
+    blacklist = list(pd.DataFrame(data_blacklist)['word'].values)
 
     df_radio_reconocimiento["Sentimiento"] = (
         df_radio_reconocimiento.text.fillna("")
@@ -155,6 +154,16 @@ def tag_file(radio, clear_tags=True):
     df_radio_reconocimiento.loc[
         df_radio_reconocimiento.Sentimiento_N != "NEG", "tag"
     ] = "No tag"
+
+
+    #Limpiando tags del blacklist
+    df_blacklist = (df_radio_reconocimiento.text.fillna("")
+                    .apply(str)
+                    .apply(lambda y: any([word in y for word in blacklist]))
+                    )
+    df_radio_reconocimiento.loc[df_blacklist, 'tag'] = "No tag"
+
+
     df_radio_reconocimiento["datetime"] = pd.to_datetime(
         df_radio_reconocimiento["file"].apply(lambda y: re.findall("\d+", y)[0])
     )
@@ -195,5 +204,5 @@ def tag_file(radio, clear_tags=True):
     [*map(lambda f: os.remove(f), files)]
 
     for index, row in df_radio_reconocimiento.iterrows():
-        move(f"data/{radio}_read/{row['file']}", f"{backend_dir}/files/audios")
+        move(f"data/{radio}_read/{row['file']}", f"{backend_dir}/audios")
 

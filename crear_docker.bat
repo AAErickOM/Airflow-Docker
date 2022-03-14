@@ -1,3 +1,3 @@
 docker compose build
-timeout 60
+timeout 120
 docker compose up
