@@ -9,16 +9,20 @@ from nltk.stem import SnowballStemmer
 from pysentimiento import create_analyzer
 
 
-diccionario_stem = {}
-stemmer = SnowballStemmer("spanish")
-stop_words = stopwords.words("spanish")
-analyzer = create_analyzer(task="sentiment", lang="es")
-core_dir = "core"
-backend_dir = "../conflictividad_backend"
+
+
+
+
+
 
 
 def preprocess(text, stem=True):
+    stemmer = SnowballStemmer("spanish")
+    stop_words = stopwords.words("spanish")
+    diccionario_stem = {}
+
     TEXT_CLEANING_RE = "\d+|-|_|°|/|\)|\(|\!|\?|\¡|\¿|\.|\|º,"
+
 
     def normalize(s):
         replacements = (
@@ -59,6 +63,10 @@ def preprocess(text, stem=True):
 
 
 def tag_file(radio, clear_tags=True):
+    core_dir = "core"
+    backend_dir = "../conflictividad_backend"
+
+    analyzer = create_analyzer(task="sentiment", lang="es")
 
     logging.info(f"{radio}: Sentyment Analysis")
 
@@ -66,7 +74,7 @@ def tag_file(radio, clear_tags=True):
         f"data/{radio}_transcript/{f}" for f in os.listdir(f"data/{radio}_transcript")
     ]
 
-    ruta_stopwords = r"data/keywords"
+    ruta_stopwords = r"data/_keywords"
 
     df_keywords = pd.read_excel(f"{ruta_stopwords}/keywordsStem.xlsx")
 
@@ -80,7 +88,6 @@ def tag_file(radio, clear_tags=True):
         )
         print(df_radio_reconocimiento)
     except:
-        print("No hubo reconocimiento")
         return
 
     keywords = {
@@ -107,13 +114,22 @@ def tag_file(radio, clear_tags=True):
         # 'luch':'Conflicto',
         # 'pel':'Conflicto',
     }
+
     #| df_keywords.set_index("word")["sector"].to_dict()
+
+
+
+
 
     df_radio_reconocimiento["Sentimiento"] = (
         df_radio_reconocimiento.text.fillna("")
         .apply(str)
         .apply(lambda x: analyzer.predict(x))
     )
+
+    print("Finalizo")
+
+    
     df_radio_reconocimiento["Sentimiento_N"] = df_radio_reconocimiento[
         "Sentimiento"
     ].apply(lambda y: y.output)

@@ -9,7 +9,7 @@ import pandas as pd
 import logging
 
 def read_speech_basic(path, ruta_read, ruta_transcript, ruta_fail,  tmp_dir="data/tmp"):
-
+    print("------------------------------------------")
     if len(os.listdir(path))>0:
 
         _file = path + "/" + os.listdir(path)[0]
@@ -19,22 +19,29 @@ def read_speech_basic(path, ruta_read, ruta_transcript, ruta_fail,  tmp_dir="dat
         if not os.path.isdir(tmp_dir):
             os.makedirs(tmp_dir)
 
+        move(f"{_file}", f"{ruta_read}/{filename}.mp3")
+
         try:
-            audio = AudioSegment.from_file(_file)
+
+            print("000000000000000000000000000000000000")
+            print(f"{ruta_read}/{filename}.mp3")
+            audio = AudioSegment.from_file(f"{ruta_read}/{filename}.mp3")
+
+            print("11111111111111111111111111111111111")
             audio.export(filedir, format="wav")
 
             r = sr.Recognizer()
-
+            print("22222222222222222222222222222222222")
             with sr.AudioFile(filedir) as source:
 
                 audio = r.listen(source, timeout=30)
                 text = r.recognize_google(audio, language="es-PE")
                 logging.debug("Finish")
 
-            os.remove(filedir)
 
             data_text_new = pd.DataFrame([{"file": _file, "text": text}])
-            move(f"{_file}", f"{ruta_read}/{filename}.mp3")
             data_text_new.to_csv(f"{ruta_transcript}/{filename}.csv")
+
+            os.remove(filedir)
         except:
-            move(f"{_file}", f"{ruta_fail}/{filename}.mp3")
+            move(f"{ruta_read}/{filename}.mp3", f"{ruta_fail}/{filename}.mp3")
