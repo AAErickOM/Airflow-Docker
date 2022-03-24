@@ -6,7 +6,6 @@ import pandas as pd
 from shutil import move
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
-from pysentimiento import create_analyzer
 import requests
 import pause
 
@@ -66,8 +65,6 @@ def tag_file(radio, clear_tags=True):
     core_dir = "core"
     backend_dir = "data_backend"
 
-    analyzer = create_analyzer(task="sentiment", lang="es")
-
     logging.info(f"{radio}: Sentyment Analysis")
 
     files = [
@@ -120,6 +117,7 @@ def tag_file(radio, clear_tags=True):
     data_blacklist = eval(requests.get("http://190.223.48.219:8000/conflictividad/blacklist").text)
     blacklist = list(pd.DataFrame(data_blacklist)['word'].values)
 
+    '''
     df_radio_reconocimiento["Sentimiento"] = (
         df_radio_reconocimiento.text.fillna("")
         .apply(str)
@@ -132,6 +130,9 @@ def tag_file(radio, clear_tags=True):
     df_radio_reconocimiento["Sentimiento_N"] = df_radio_reconocimiento[
         "Sentimiento"
     ].apply(lambda y: y.output)
+    
+    '''
+    df_radio_reconocimiento["Sentimiento_N"] = 'NEG'
 
     df_radio_reconocimiento["text_stem"] = df_radio_reconocimiento["text"].apply(
         lambda y: preprocess(y, stem=True)
