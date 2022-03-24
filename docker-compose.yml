@@ -27,6 +27,7 @@ services:
         image: webserver:latest
         build:
           context: .
+          dockerfile: Dockerfile_worker
         restart: always
         depends_on:
             - postgres
@@ -54,6 +55,7 @@ services:
         image: scheduler:latest
         build:
           context: .
+          dockerfile: Dockerfile_worker
         restart: always
         depends_on:
             - webserver
